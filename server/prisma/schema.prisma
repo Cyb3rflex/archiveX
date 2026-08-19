@@ -1,0 +1,191 @@
+// ArchiveX — Prisma Schema (Version 1)
+//
+// Database provider : PostgreSQL (Neon)
+// Primary keys      : UUID (cuid() used for Neon compatibility & URL-safe IDs)
+// Naming            : singular model names, camelCase fields (docs/database-design.md)
+//
+// Phase 1 entities only:
+//   Faculty, Department, Level, Semester, Course, PastQuestion, Admin
+//
+// Excluded (future phases):
+//   Student, Bookmark, LectureNote, Assignment, Notification, Discussion, Comment, AIConversation
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  // Neon pooled connection — used at runtime
+  url       = env("DATABASE_URL")
+  // Neon direct (non-pooled) connection — used for migrations
+  // Required because PgBouncer (Neon's pooler) does not support DDL statements
+  directUrl = env("DIRECT_URL")
+}
+
+// ─────────────────────────────────────────
+// Enums
+// ─────────────────────────────────────────
+
+enum Role {
+  SUPER_ADMIN
+  ADMIN
+}
+
+enum ExamType {
+  CA
+  MID_SEMESTER
+  FINAL
+}
+
+// ─────────────────────────────────────────
+// Faculty
+// ─────────────────────────────────────────
+
+model Faculty {
+  id          String       @id @default(cuid())
+  name        String       @unique
+  slug        String       @unique
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  departments Department[]
+
+  @@index([slug])
+  @@map("faculties")
+}
+
+// ─────────────────────────────────────────
+// Department
+// ─────────────────────────────────────────
+
+model Department {
+  id        String   @id @default(cuid())
+  facultyId String
+  name      String
+  slug      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  faculty Faculty  @relation(fields: [facultyId], references: [id], onDelete: Restrict)
+  courses Course[]
+
+  // Department name must be unique within a faculty (docs/database-design.md)
+  @@unique([name, facultyId])
+  @@index([facultyId])
+  @@index([slug])
+  @@map("departments")
+}
+
+// ─────────────────────────────────────────
+// Level
+// ─────────────────────────────────────────
+// Intentionally lightweight — Level is a lookup table (100, 200, 300, 400, 500).
+// No timestamps needed; these values change very rarely.
+
+model Level {
+  id      String   @id @default(cuid())
+  name    String   @unique
+
+  courses Course[]
+
+  @@map("levels")
+}
+
+// ─────────────────────────────────────────
+// Semester
+// ─────────────────────────────────────────
+// Lookup table — First Semester / Second Semester.
+
+model Semester {
+  id      String   @id @default(cuid())
+  name    String   @unique
+
+  courses Course[]
+
+  @@map("semesters")
+}
+
+// ─────────────────────────────────────────
+// Course
+// ─────────────────────────────────────────
+
+model Course {
+  id           String   @id @default(cuid())
+  departmentId String
+  levelId      String
+  semesterId   String
+  courseCode   String
+  courseTitle  String
+  slug         String   @unique
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  department    Department     @relation(fields: [departmentId], references: [id], onDelete: Restrict)
+  level         Level          @relation(fields: [levelId], references: [id], onDelete: Restrict)
+  semester      Semester       @relation(fields: [semesterId], references: [id], onDelete: Restrict)
+  pastQuestions PastQuestion[]
+
+  // Prevents duplicate courses for the same code in the same dept/level/semester
+  @@unique([courseCode, departmentId, levelId, semesterId])
+  @@index([courseCode])
+  @@index([courseTitle])
+  @@index([departmentId])
+  @@index([levelId])
+  @@index([semesterId])
+  @@map("courses")
+}
+
+// ─────────────────────────────────────────
+// PastQuestion
+// ─────────────────────────────────────────
+// Stores metadata only. PDF files are stored in Cloudinary;
+// only the Cloudinary URL is persisted here.
+
+model PastQuestion {
+  id         String   @id @default(cuid())
+  courseId   String
+  session    String   // e.g. "2024/2025"
+  year       Int      // e.g. 2025
+  examType   ExamType
+  fileName   String
+  fileUrl    String   // Cloudinary URL
+  fileSize   Int      // bytes
+  downloads  Int      @default(0)
+  uploadedBy String   // Admin ID
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  course Course @relation(fields: [courseId], references: [id], onDelete: Restrict)
+  admin  Admin  @relation(fields: [uploadedBy], references: [id], onDelete: Restrict)
+
+  // Prevents duplicate uploads for the same course/session/examType combination
+  @@unique([courseId, session, examType])
+  @@index([courseId])
+  @@index([session])
+  @@index([year])
+  @@map("past_questions")
+}
+
+// ─────────────────────────────────────────
+// Admin
+// ─────────────────────────────────────────
+// Stores administrator accounts.
+// Passwords are hashed using bcrypt (Phase 2 — authentication).
+// Plain-text passwords must never be stored.
+
+model Admin {
+  id        String   @id @default(cuid())
+  fullName  String
+  email     String   @unique
+  password  String   // bcrypt hash — set in Phase 2
+  role      Role     @default(ADMIN)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  pastQuestions PastQuestion[]
+
+  @@index([email])
+  @@map("admins")
+}
