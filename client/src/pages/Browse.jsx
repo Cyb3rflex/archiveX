@@ -70,7 +70,7 @@ export default function Browse() {
   }, [selectedLevel]);
 
   return (
-    <Layout>
+    <main>
       <div className="container py-10 max-w-6xl">
         {/* Header */}
         <div className="mb-8">
@@ -357,6 +357,6 @@ export default function Browse() {
           </AnimatePresence>
         )}
       </div>
-    </Layout>
+    </main>
   );
 }

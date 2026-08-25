@@ -24,8 +24,8 @@ export default function App() {
         <Route path="/course/:courseSlug" element={<Course />} />
         <Route path="/past-question/:questionId" element={<PastQuestion />} />
         <Route path="/about" element={<About />} />
+        <Route path="*" element={<NotFound />} />
       </Route>
-      <Route path="*" element={<NotFound />} />
     </Routes>
   );
 }

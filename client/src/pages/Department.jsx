@@ -14,7 +14,7 @@ export default function Department() {
   const faculty = getFacultyBySlug(dept.facultySlug);
 
   return (
-    <Layout>
+    <main>
       <div className="container py-10">
         <Breadcrumbs items={[
           { label: 'Home', href: '/' },
@@ -44,6 +44,6 @@ export default function Department() {
           ))}
         </div>
       </div>
-    </Layout>
+    </main>
   );
 }
