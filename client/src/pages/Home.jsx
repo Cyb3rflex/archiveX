@@ -89,9 +89,9 @@ export default function Home() {
   };
 
   return (
-    <Layout>
+    <main>
       {/* ─── HERO SECTION ─── */}
-      <section className="relative overflow-hidden pt-12 pb-20 md:pt-20 md:pb-28 flex flex-col items-center text-center">
+      <section className="relative overflow-hidden py-8 md:pt-10 md:pb-28 flex flex-col items-center text-center">
         {/* Background ambient orbs */}
         <div className="orb orb-primary absolute -top-24 -left-20 w-112.5 h-112.5" aria-hidden="true" />
         <div
@@ -101,10 +101,10 @@ export default function Home() {
         />
 
         <div className="container relative z-10 max-w-5xl">
-          <motion.div variants={stagger} initial="hidden" animate="show" className="flex flex-col items-center">
+          <motion.div variants={stagger} initial="hidden" animate="show" className="flex flex-col items-center gap-7">
             {/* Pill Tag */}
             <motion.div variants={fadeUp}>
-              <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-(--color-primary-muted) text-(--color-primary) text-xs font-semibold tracking-wide mb-6 border border-(--color-primary-muted) shadow-sm">
+              <span className="flex items-center justify-center gap-2 px-3.5 py-1.5 w-fit h-6 rounded-full bg-(--color-primary-muted) text-(--color-primary) text-xs font-semibold tracking-wide border border-(--color-primary-muted) shadow-sm">
                 <Sparkles size={13} className="text-(--color-primary) animate-pulse" />
                 University Past Question Archive
               </span>
@@ -316,6 +316,6 @@ export default function Home() {
           </Link>
         </div>
       </section>
-    </Layout>
+    </main>
   );
 }
