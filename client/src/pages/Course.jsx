@@ -28,7 +28,7 @@ export default function Course() {
   const sessions = Object.keys(grouped).sort((a, b) => b.localeCompare(a));
 
   return (
-    <Layout>
+    <main>
       <div className="container py-10">
         <Breadcrumbs items={[
           { label: 'Home', href: '/' },
@@ -82,6 +82,6 @@ export default function Course() {
           </div>
         )}
       </div>
-    </Layout>
+    </main>
   );
 }

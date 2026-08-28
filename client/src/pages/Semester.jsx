@@ -20,7 +20,7 @@ export default function Semester() {
   const semName = SEMESTER_NAMES[semester] ?? `Semester ${semester}`;
 
   return (
-    <Layout>
+    <main>
       <div className="container py-10">
         <Breadcrumbs items={[
           { label: 'Home', href: '/' },
@@ -58,6 +58,6 @@ export default function Semester() {
           </div>
         )}
       </div>
-    </Layout>
+    </main>
   );
 }

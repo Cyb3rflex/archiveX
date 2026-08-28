@@ -16,7 +16,7 @@ export default function Level() {
   const sem2Count = getCoursesByDeptLevelSemester(departmentSlug, level, 2).length;
 
   return (
-    <Layout>
+    <main>
       <div className="container py-10">
         <Breadcrumbs items={[
           { label: 'Home', href: '/' },
@@ -43,6 +43,6 @@ export default function Level() {
           <SemesterCard semester={2} departmentSlug={departmentSlug} level={level} courseCount={sem2Count} />
         </div>
       </div>
-    </Layout>
+    </main>
   );
 }

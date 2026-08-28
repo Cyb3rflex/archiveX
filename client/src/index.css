@@ -5,28 +5,65 @@
    ============================================================ */
 :root {
   /* Brand palette — crisp deep navy with electric indigo/cyan accents */
-  --color-bg: #070d1e;
-  --color-surface: #0f172a;
-  --color-surface-alt: #1e293b;
-  --color-border: #22324e;
-  --color-border-subtle: rgba(255, 255, 255, 0.08);
+  /* Backgrounds & Surfaces */
+--color-bg: #ecfcff;
+--color-surface: #ecfcff;
+--color-surface-alt: #daf2f6;
+--color-surface-dim: #c6dfe2;
+--color-surface-bright: #ecfcff;
+--color-surface-container: #daf2f6;
+--color-surface-container-high: #d4edf1;
+--color-surface-container-highest: #cee7eb;
+--color-surface-container-low: #dff8fc;
+--color-surface-container-lowest: #ffffff;
 
-  --color-primary: #6366f1;
-  --color-primary-hover: #4f46e5;
-  --color-primary-muted: rgba(99, 102, 241, 0.18);
+/* Borders & Outlines */
+--color-border: #73777f;
+--color-border-subtle: #c3c7cf;
 
-  --color-accent: #06b6d4;
-  --color-accent-hover: #0891b2;
-  --color-accent-muted: rgba(6, 182, 212, 0.15);
+/* Primary Colors */
+--color-primary: #00162b;
+--color-primary-hover: #27496b;
+--color-primary-container: #002b4c;
+--color-primary-muted: rgba(0, 22, 43, 0.12);
+--color-primary-fixed: #d1e4ff;
+--color-primary-fixed-dim: #a8c9f2;
 
-  --color-success: #10b981;
-  --color-warning: #f59e0b;
-  --color-error: #ef4444;
+/* Secondary Colors */
+--color-secondary: #3a6475;
+--color-secondary-hover: #406a7b;
+--color-secondary-container: #bee9fd;
+--color-secondary-muted: rgba(58, 100, 117, 0.12);
+--color-secondary-fixed: #bee9fd;
+--color-secondary-fixed-dim: #a2cde0;
 
-  --color-text-primary: #f8fafc;
-  --color-text-secondary: #94a3b8;
-  --color-text-muted: #64748b;
-  --color-text-inverse: #070d1e;
+/* Tertiary Colors */
+--color-tertiary: #290c00;
+--color-tertiary-hover: #733511;
+--color-tertiary-container: #4a1b00;
+--color-tertiary-muted: rgba(41, 12, 0, 0.12);
+--color-tertiary-fixed: #ffdbcb;
+--color-tertiary-fixed-dim: #ffb691;
+
+/* Semantic / Status Colors */
+--color-error: #ba1a1a;
+--color-error-hover: #93000a;
+--color-error-container: #ffdad6;
+--color-error-muted: rgba(186, 26, 26, 0.12);
+
+/* Text Colors */
+--color-text-primary: #071f22;
+--color-text-secondary: #43474e;
+--color-text-muted: #73777f;
+--color-text-inverse: #dcf5f9;
+
+/* Inverse Colors */
+--color-inverse-surface: #1d3437;
+--color-inverse-primary: #a8c9f2;
+
+/* Tint */
+--color-surface-tint: #406184;
+
 
   /* Typography */
   --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -57,11 +94,6 @@
 /* ============================================================
    BASE STYLES
    ============================================================ */
-*, *::before, *::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
 
 html {
   scroll-behavior: smooth;

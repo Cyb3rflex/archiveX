@@ -6,7 +6,7 @@ import Button from '../components/ui/Button';
 
 export default function NotFound() {
   return (
-    <Layout>
+    <main>
       <div className="container flex flex-col items-center justify-center min-h-[70vh] text-center py-20">
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
@@ -46,6 +46,6 @@ export default function NotFound() {
           </div>
         </motion.div>
       </div>
-    </Layout>
+    </main>
   );
 }

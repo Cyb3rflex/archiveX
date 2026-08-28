@@ -26,7 +26,7 @@ export default function PastQuestion() {
   ];
 
   return (
-    <Layout>
+    <main>
       <div className="container py-10 max-w-3xl">
         <Breadcrumbs items={[
           { label: 'Home', href: '/' },
@@ -96,6 +96,6 @@ export default function PastQuestion() {
           </div>
         </motion.div>
       </div>
-    </Layout>
+    </main>
   );
 }

@@ -40,7 +40,7 @@ const fadeUp = {
 
 export default function About() {
   return (
-    <Layout>
+    <main>
       <div className="container py-16 md:py-24 max-w-4xl">
         {/* Hero */}
         <motion.div
@@ -150,6 +150,6 @@ export default function About() {
           </div>
         </section>
       </div>
-    </Layout>
+    </main>
   );
 }
