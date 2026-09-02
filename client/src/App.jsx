@@ -8,6 +8,9 @@ import Semester from './pages/Semester';
 import Course from './pages/Course';
 import PastQuestion from './pages/PastQuestion';
 import About from './pages/About';
+import PrivacyPolicy from './pages/PrivacyPolicy';
+import TermsOfService from './pages/TermsOfService';
+import FairUsePolicy from './pages/FairUsePolicy';
 import NotFound from './pages/NotFound';
 import Layout from './components/layout/Layout';
 
@@ -24,6 +27,9 @@ export default function App() {
         <Route path="/course/:courseSlug" element={<Course />} />
         <Route path="/past-question/:questionId" element={<PastQuestion />} />
         <Route path="/about" element={<About />} />
+        <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+        <Route path="/terms-of-service" element={<TermsOfService />} />
+        <Route path="/fair-use-policy" element={<FairUsePolicy />} />
         <Route path="*" element={<NotFound />} />
       </Route>
     </Routes>

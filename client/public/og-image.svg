@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0f2d52"/>
+      <stop offset="100%" style="stop-color:#0b1220"/>
+    </linearGradient>
+    <linearGradient id="accentGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#3b82f6"/>
+      <stop offset="100%" style="stop-color:#8b5cf6"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bgGrad)"/>
+
+  <!-- Decorative circles -->
+  <circle cx="100" cy="100" r="200" fill="#3b82f6" opacity="0.1"/>
+  <circle cx="1100" cy="530" r="250" fill="#8b5cf6" opacity="0.1"/>
+  <circle cx="600" cy="315" r="300" fill="#ffffff" opacity="0.02"/>
+
+  <!-- Grid pattern -->
+  <g stroke="#ffffff" stroke-opacity="0.05" stroke-width="1">
+    <line x1="0" y1="157.5" x2="1200" y2="157.5"/>
+    <line x1="0" y1="315" x2="1200" y2="315"/>
+    <line x1="0" y1="472.5" x2="1200" y2="472.5"/>
+    <line x1="300" y1="0" x2="300" y2="630"/>
+    <line x1="600" y1="0" x2="600" y2="630"/>
+    <line x1="900" y1="0" x2="900" y2="630"/>
+  </g>
+
+  <!-- Archive icon (stylized folder/document) -->
+  <g transform="translate(120, 165)">
+    <!-- Main folder -->
+    <path d="M0 60 L0 280 Q0 300 20 300 L280 300 Q300 300 300 280 L300 60 Q300 40 280 40 L140 40 L120 20 L20 20 Q0 20 0 40 Z"
+          fill="#1e3a5f" stroke="#3b82f6" stroke-width="3"/>
+    <!-- Folder tab -->
+    <path d="M0 60 L0 40 Q0 20 20 20 L120 20 L140 40 L300 40 L300 60"
+          fill="none" stroke="#3b82f6" stroke-width="3"/>
+    <!-- Document lines inside folder -->
+    <rect x="40" y="90" width="220" height="12" rx="6" fill="#3b82f6" opacity="0.6"/>
+    <rect x="40" y="120" width="180" height="12" rx="6" fill="#3b82f6" opacity="0.4"/>
+    <rect x="40" y="150" width="200" height="12" rx="6" fill="#3b82f6" opacity="0.4"/>
+    <rect x="40" y="180" width="160" height="12" rx="6" fill="#3b82f6" opacity="0.4"/>
+    <rect x="40" y="210" width="190" height="12" rx="6" fill="#3b82f6" opacity="0.4"/>
+  </g>
+
+  <!-- Text content -->
+  <g font-family="system-ui, -apple-system, sans-serif">
+    <!-- Main title -->
+    <text x="500" y="240" font-size="72" font-weight="800" fill="#ffffff">
+      ArchiveX
+    </text>
+
+    <!-- Gradient underline -->
+    <rect x="500" y="260" width="400" height="6" rx="3" fill="url(#accentGrad)"/>
+
+    <!-- Subtitle -->
+    <text x="500" y="330" font-size="32" font-weight="500" fill="#94a3b8">
+      University Past Question Archive
+    </text>
+
+    <!-- Features -->
+    <g transform="translate(500, 400)">
+      <g fill="#e2e8f0" font-size="22">
+        <text x="0" y="0">📚 Browse past questions by faculty</text>
+        <text x="0" y="40">🔍 Search by department &amp; level</text>
+        <text x="0" y="80">⬇️ Download exam materials instantly</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- Decorative X mark -->
+  <g transform="translate(1050, 80)" opacity="0.15">
+    <line x1="0" y1="0" x2="80" y2="80" stroke="#ffffff" stroke-width="12" stroke-linecap="round"/>
+    <line x1="80" y1="0" x2="0" y2="80" stroke="#ffffff" stroke-width="12" stroke-linecap="round"/>
+  </g>
+</svg>

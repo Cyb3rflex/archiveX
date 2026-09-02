@@ -64,19 +64,19 @@ export default function Footer() {
                 Legal
               </h4>
               <Link
-                to="/about"
+                to="/privacy-policy"
                 className="text-xs sm:text-sm text-(--color-text-secondary) hover:text-(--color-primary) transition-colors duration-200"
               >
                 Privacy Policy
               </Link>
               <Link
-                to="/about"
+                to="/terms-of-service"
                 className="text-xs sm:text-sm text-(--color-text-secondary) hover:text-(--color-primary) transition-colors duration-200"
               >
                 Terms of Service
               </Link>
               <Link
-                to="/about"
+                to="/fair-use-policy"
                 className="text-xs sm:text-sm text-(--color-text-secondary) hover:text-(--color-primary) transition-colors duration-200"
               >
                 Fair Use Policy
