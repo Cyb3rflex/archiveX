@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Building2, GraduationCap, Layers, Calendar, ArrowRight } from 'lucide-react';
-import Layout from '../components/layout/Layout';
+import { BookCover, LibraryShelf } from '../components/illustrations/BookIllustration';
 import SearchBar from '../components/ui/SearchBar';
 import FacultyCard from '../components/cards/FacultyCard';
 import DepartmentCard from '../components/cards/DepartmentCard';
@@ -72,14 +72,19 @@ export default function Browse() {
   return (
     <main>
       <div className="container py-10 max-w-6xl">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-(--color-text-primary) mb-2 tracking-tight">
-            Browse Archive
-          </h1>
-          <p className="text-sm sm:text-base text-(--color-text-secondary)">
-            Explore university past exam questions by faculty, department, level, or semester.
-          </p>
+        {/* Header with illustration */}
+        <div className="flex items-start justify-between mb-8 gap-6">
+          <div>
+            <h1 className="text-3xl sm:text-4xl font-extrabold text-(--color-text-primary) mb-2 tracking-tight">
+              Browse Archive
+            </h1>
+            <p className="text-sm sm:text-base text-(--color-text-secondary)">
+              Explore university past exam questions by faculty, department, level, or semester.
+            </p>
+          </div>
+          <div className="hidden sm:block shrink-0 animate-float opacity-50" aria-hidden="true">
+            <LibraryShelf size={80} />
+          </div>
         </div>
 
         {/* Search & Tabs */}
@@ -107,7 +112,7 @@ export default function Browse() {
                     className={[
                       'flex items-center gap-2 px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all cursor-pointer',
                       isActive
-                        ? 'bg-(--color-primary) text-white shadow-sm'
+                        ? 'bg-(--color-primary) text-(--color-on-primary) shadow-sm'
                         : 'text-(--color-text-secondary) hover:text-(--color-text-primary) hover:bg-(--color-surface-alt)',
                     ].join(' ')}
                   >
@@ -219,7 +224,7 @@ export default function Browse() {
                     className={[
                       'px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all cursor-pointer border',
                       !selectedLevel
-                        ? 'bg-(--color-primary) text-white border-(--color-primary)'
+                        ? 'bg-(--color-primary) text-(--color-on-primary) border-(--color-primary)'
                         : 'bg-(--color-surface) border-(--color-border) text-(--color-text-secondary) hover:border-(--color-primary)',
                     ].join(' ')}
                   >
@@ -233,7 +238,7 @@ export default function Browse() {
                       className={[
                         'px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all cursor-pointer border',
                         selectedLevel === String(lvl)
-                          ? 'bg-(--color-primary) text-white border-(--color-primary)'
+                          ? 'bg-(--color-primary) text-(--color-on-primary) border-(--color-primary)'
                           : 'bg-(--color-surface) border-(--color-border) text-(--color-text-secondary) hover:border-(--color-primary)',
                       ].join(' ')}
                     >
@@ -264,7 +269,7 @@ export default function Browse() {
                 />
                 <div className="grid sm:grid-cols-2 gap-6">
                   {/* First Semester */}
-                  <div className="p-6 rounded-xl bg-(--color-surface) border border-(--color-border)">
+                  <div className="glass3d bg-(--color-surface)/60 p-6 rounded-xl">
                     <div className="flex items-center gap-3 mb-4">
                       <span className="w-3 h-3 rounded-full bg-(--color-primary)" />
                       <h3 className="font-bold text-lg text-(--color-text-primary)">First Semester</h3>
@@ -291,7 +296,7 @@ export default function Browse() {
                   </div>
 
                   {/* Second Semester */}
-                  <div className="p-6 rounded-xl bg-(--color-surface) border border-(--color-border)">
+                  <div className="glass3d bg-(--color-surface)/60 p-6 rounded-xl">
                     <div className="flex items-center gap-3 mb-4">
                       <span className="w-3 h-3 rounded-full bg-(--color-accent)" />
                       <h3 className="font-bold text-lg text-(--color-text-primary)">Second Semester</h3>

@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import { Archive, Search, Download, BookOpen, Zap, GraduationCap, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import Layout from '../components/layout/Layout';
+import { OpenBook, LibraryShelf, BookStack, GraduationCap as GraduationCapSVG } from '../components/illustrations/BookIllustration';
 
 const STEPS = [
   {
@@ -47,11 +47,19 @@ export default function About() {
           variants={{ show: { transition: { staggerChildren: 0.12 } } }}
           initial="hidden"
           animate="show"
-          className="text-center mb-16"
+          className="text-center mb-16 relative"
         >
+          {/* Floating illustrations */}
+          <div className="hidden md:block absolute top-0 left-0 animate-float" aria-hidden="true">
+            <OpenBook size={80} style={{ opacity: 0.4 }} />
+          </div>
+          <div className="hidden md:block absolute top-4 right-0 animate-float-2" aria-hidden="true">
+            <BookStack size={90} style={{ opacity: 0.4 }} />
+          </div>
+
           <motion.div variants={fadeUp}>
-            <div className="inline-flex w-18 h-18 rounded-2xl bg-linear-to-br from-(--color-primary) to-(--color-accent) items-center justify-center mb-6 shadow-(--shadow-glow-primary)">
-              <Archive size={32} className="text-white" />
+            <div className="inline-flex w-20 h-20 rounded-2xl bg-linear-to-br from-(--color-accent) to-(--color-primary) items-center justify-center mb-6 shadow-(--shadow-glow-primary)">
+              <Archive size={36} className="text-white" />
             </div>
           </motion.div>
           <motion.h1
@@ -87,13 +95,13 @@ export default function About() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.4 }}
-                className="flex flex-col items-center text-center p-8 rounded-2xl bg-(--color-surface) border border-(--color-border) hover-shadow"
+                className="glass3d bg-(--color-surface)/70 flex flex-col items-center text-center p-8 rounded-2xl"
               >
                 <div className="relative mb-5">
                   <div className="w-16 h-16 rounded-full bg-(--color-primary-muted) flex items-center justify-center">
                     <Icon size={26} className="text-(--color-primary)" />
                   </div>
-                  <span className="absolute -top-1 -right-1 text-xs font-black text-(--color-primary) bg-(--color-bg) border border-(--color-primary) rounded-full w-6 h-6 flex items-center justify-center">
+                  <span className="absolute -top-1 -right-1 text-xs font-black text-(--color-primary) bg-(--color-surface) border border-(--color-primary) rounded-full w-6 h-6 flex items-center justify-center">
                     {step}
                   </span>
                 </div>
@@ -107,12 +115,12 @@ export default function About() {
         </section>
 
         {/* Mission */}
-        <section className="mb-20 p-8 sm:p-10 rounded-2xl bg-(--color-surface) border border-(--color-border) hover-shadow">
+        <section className="mb-20 glass3d bg-(--color-surface)/70 p-8 sm:p-10 rounded-2xl">
           <div className="flex flex-col sm:flex-row items-start gap-6">
-            <div className="w-14 h-14 rounded-xl bg-(--color-accent-muted) flex items-center justify-center shrink-0 text-(--color-accent)">
-              <GraduationCap size={28} />
+            <div className="w-20 h-20 rounded-2xl bg-(--color-accent-muted) flex items-center justify-center shrink-0">
+              <GraduationCapSVG size={64} />
             </div>
-            <div>
+            <div className="flex-1">
               <h2 className="text-2xl font-bold text-(--color-text-primary) mb-3">
                 Our Academic Mission
               </h2>
@@ -124,12 +132,25 @@ export default function About() {
               <Link to="/browse">
                 <button
                   type="button"
-                  className="bg-(--color-primary) text-white hover:bg-(--color-primary-hover) font-semibold text-sm px-6 py-2.5 rounded-lg transition-all flex items-center gap-2 cursor-pointer shadow-md"
+                  className="bg-(--color-primary) text-(--color-on-primary) hover:bg-(--color-primary-hover) font-semibold text-sm px-6 py-2.5 rounded-lg transition-all flex items-center gap-2 cursor-pointer shadow-(--shadow-sm)"
                 >
                   Start Exploring Archive <ArrowRight size={16} />
                 </button>
               </Link>
             </div>
+          </div>
+        </section>
+
+        {/* Stats illustration */}
+        <section className="mb-20 text-center">
+          <div className="glass3d bg-(--color-surface)/60 rounded-2xl p-8 sm:p-12">
+            <LibraryShelf size={140} className="mx-auto mb-6" />
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-(--color-text-primary) mb-2">
+              A Growing Library
+            </h2>
+            <p className="text-sm text-(--color-text-secondary) max-w-lg mx-auto">
+              Every semester, new past questions are verified and added to the archive — building the largest open collection for students.
+            </p>
           </div>
         </section>
 

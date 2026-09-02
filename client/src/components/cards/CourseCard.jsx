@@ -1,7 +1,8 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { FileText, ArrowRight } from 'lucide-react';
+import { FileText, ArrowRight, BookOpen } from 'lucide-react';
 import Badge from '../ui/Badge';
+import { BookCover } from '../illustrations/BookIllustration';
 import { getPQCountByCourse } from '../../data/mockData';
 
 export default function CourseCard({ course }) {
@@ -19,8 +20,8 @@ export default function CourseCard({ course }) {
         ].join(' ')}
         aria-label={`${course.code} — ${course.title}`}
       >
-        <div className="w-10 h-10 rounded-md bg-(--color-surface-alt) flex items-center justify-center shrink-0">
-          <FileText size={18} className="text-(--color-primary)" />
+        <div className="shrink-0 transition-transform group-hover:scale-105 group-hover:rotate-2">
+          <BookCover size={56} />
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-2">
@@ -35,9 +36,12 @@ export default function CourseCard({ course }) {
             </div>
             <ArrowRight size={15} className="text-(--color-text-muted) group-hover:text-(--color-primary) group-hover:translate-x-1 transition-all shrink-0 mt-0.5" />
           </div>
-          <p className="text-xs text-(--color-text-muted) mt-2">
-            {pqCount} past question{pqCount !== 1 ? 's' : ''} available
-          </p>
+          <div className="flex items-center gap-1.5 mt-2 text-xs text-(--color-text-muted)">
+            <FileText size={11} />
+            <span>
+              {pqCount} past question{pqCount !== 1 ? 's' : ''} available
+            </span>
+          </div>
         </div>
       </Link>
     </motion.div>

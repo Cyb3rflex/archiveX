@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { FileDown, Eye, FileText, HardDrive, Download, Calendar, Check } from 'lucide-react';
 import Badge from '../ui/Badge';
 import Button from '../ui/Button';
+import { PDFDocument } from '../illustrations/BookIllustration';
 
 const ACCENT_COLORS = [
   '#F59E71', // Warm orange/coral
@@ -43,71 +44,90 @@ export default function PastQuestionCard({ pq, _courseSlug, variant = 'list', in
         {/* Top accent indicator */}
         <div className="absolute top-0 left-0 w-full h-1" style={{ backgroundColor: accentColor }} />
 
-        <div className="p-6 flex flex-col flex-1">
-          {/* Header row */}
-          <div className="flex justify-between items-start gap-2 mb-4">
-            <div>
-              <span className="font-semibold text-xs tracking-wider uppercase text-(--color-primary) bg-(--color-primary-muted) px-2.5 py-1 rounded">
-                {courseCode}
-              </span>
-              <h3 className="font-bold text-lg text-(--color-text-primary) mt-2 group-hover:text-(--color-primary) transition-colors line-clamp-1">
-                {courseTitle}
-              </h3>
-            </div>
-            <span
-              className="text-xs font-semibold px-2.5 py-1 rounded border tracking-wide whitespace-nowrap"
-              style={{
-                color: accentColor,
-                backgroundColor: `${accentColor}18`,
-                borderColor: `${accentColor}40`,
-              }}
-            >
-              {pq.examType?.toUpperCase() || 'EXAM'}
-            </span>
+        <div className="p-5 sm:p-6 flex gap-4 flex-1">
+          {/* PDF preview thumbnail */}
+          <div className="shrink-0">
+            <PDFDocument size={56} />
           </div>
 
-          {/* Meta details */}
-          <div className="flex items-center gap-4 mb-6 text-(--color-text-secondary) text-xs">
-            <div className="flex items-center gap-1.5">
-              <Calendar size={15} className="text-(--color-text-muted)" />
-              <span>{pq.session}</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <FileText size={15} className="text-(--color-text-muted)" />
-              <span>PDF ({pq.fileSize})</span>
-            </div>
-          </div>
-
-          {/* Action buttons */}
-          <div className="flex items-center gap-3 mt-auto pt-2">
-            <Link to={`/past-question/${pq.id}`} className="flex-1">
-              <Button
-                variant="primary"
-                size="sm"
-                className="w-full justify-center"
-              >
-                View Document
-              </Button>
-            </Link>
-            <button
-              type="button"
-              onClick={handleDownload}
-              title={downloaded ? 'Downloaded!' : 'Download past question'}
-              className="p-2.5 rounded-lg border border-(--color-border) bg-(--color-surface-alt) hover:bg-(--color-surface) text-(--color-text-primary) hover:border-(--color-primary) transition-all flex items-center justify-center cursor-pointer"
-            >
-              {downloaded ? (
-                <Check size={16} className="text-(--color-success)" />
-              ) : downloading ? (
-                <motion.div
-                  animate={{ rotate: 360 }}
-                  transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}
+          <div className="flex flex-col flex-1 min-w-0">
+            {/* Header row */}
+            <div className="flex justify-between items-start gap-2 mb-3">
+              <div className="min-w-0">
+                <span
+                  className="font-semibold text-xs tracking-wider uppercase px-2.5 py-1 rounded inline-block"
+                  style={{
+                    color: accentColor,
+                    backgroundColor: `${accentColor}18`,
+                  }}
                 >
-                  <Download size={16} className="text-(--color-primary)" />
-                </motion.div>
-              ) : (
-                <Download size={16} />
-              )}
-            </button>
+                  {courseCode}
+                </span>
+                <h3 className="font-bold text-base sm:text-lg text-(--color-text-primary) mt-2 group-hover:text-(--color-primary) transition-colors line-clamp-1">
+                  {courseTitle}
+                </h3>
+              </div>
+              <span
+                className="text-[10px] font-semibold px-2.5 py-1 rounded border tracking-wide whitespace-nowrap"
+                style={{
+                  color: accentColor,
+                  backgroundColor: `${accentColor}10`,
+                  borderColor: `${accentColor}40`,
+                }}
+              >
+                {pq.examType?.toUpperCase() || 'EXAM'}
+              </span>
+            </div>
+
+            {/* Meta details */}
+            <div className="flex items-center gap-3 sm:gap-4 mb-4 text-(--color-text-secondary) text-xs flex-wrap">
+              <div className="flex items-center gap-1.5">
+                <Calendar size={13} className="text-(--color-text-muted)" />
+                <span>{pq.session}</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <FileText size={13} className="text-(--color-text-muted)" />
+                <span>PDF · {pq.fileSize}</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <Download size={13} className="text-(--color-text-muted)" />
+                <span>{pq.downloads?.toLocaleString?.() ?? pq.downloads}</span>
+              </div>
+            </div>
+
+            {/* Action buttons */}
+            <div className="flex items-center gap-2 sm:gap-3 mt-auto pt-2">
+              <Link to={`/past-question/${pq.id}`} className="flex-1">
+                <Button
+                  variant="primary"
+                  size="sm"
+                  className="w-full justify-center"
+                  icon={<Eye size={14} />}
+                >
+                  View
+                </Button>
+              </Link>
+              <button
+                type="button"
+                onClick={handleDownload}
+                title={downloaded ? 'Downloaded!' : 'Download past question'}
+                aria-label="Download"
+                className="p-2 rounded-lg border border-(--color-border) bg-(--color-surface-alt) hover:bg-(--color-surface) text-(--color-text-primary) hover:border-(--color-primary) transition-all flex items-center justify-center cursor-pointer h-8 w-8"
+              >
+                {downloaded ? (
+                  <Check size={15} className="text-(--color-success)" />
+                ) : downloading ? (
+                  <motion.div
+                    animate={{ rotate: 360 }}
+                    transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}
+                  >
+                    <Download size={15} className="text-(--color-primary)" />
+                  </motion.div>
+                ) : (
+                  <Download size={15} />
+                )}
+              </button>
+            </div>
           </div>
         </div>
       </motion.div>
@@ -120,11 +140,11 @@ export default function PastQuestionCard({ pq, _courseSlug, variant = 'list', in
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.25 }}
-      className="flex flex-col sm:flex-row sm:items-center gap-4 p-5 rounded-lg bg-(--color-surface) border border-(--color-border) hover:border-(--color-border)/60 transition-all duration-(--transition-fast)"
+      className="flex flex-col sm:flex-row sm:items-center gap-4 p-5 rounded-lg bg-(--color-surface) border border-(--color-border) hover:border-(--color-border-subtle) transition-all"
     >
-      {/* File icon */}
-      <div className="w-10 h-10 rounded-md bg-[rgba(239,68,68,0.1)] flex items-center justify-center shrink-0">
-        <FileText size={18} className="text-(--color-error)" />
+      {/* PDF icon */}
+      <div className="shrink-0">
+        <PDFDocument size={48} />
       </div>
 
       {/* Info */}

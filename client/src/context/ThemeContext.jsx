@@ -1,25 +1,46 @@
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useState, useCallback } from 'react';
 
 const ThemeContext = createContext(null);
 
 export function ThemeProvider({ children }) {
   const [isDark, setIsDark] = useState(() => {
-    const stored = localStorage.getItem('archivex-theme');
-    if (stored) return stored === 'dark';
+    try {
+      const stored = localStorage.getItem('archivex-theme');
+      if (stored) return stored === 'dark';
+    } catch {}
     return window.matchMedia('(prefers-color-scheme: dark)').matches;
   });
 
   useEffect(() => {
     const root = document.documentElement;
     if (isDark) {
-      root.classList.remove('light');
+      root.classList.add('dark');
+      root.setAttribute('data-theme', 'dark');
     } else {
-      root.classList.add('light');
+      root.classList.remove('dark');
+      root.setAttribute('data-theme', 'light');
     }
-    localStorage.setItem('archivex-theme', isDark ? 'dark' : 'light');
+    try {
+      localStorage.setItem('archivex-theme', isDark ? 'dark' : 'light');
+    } catch {}
   }, [isDark]);
 
-  const toggleTheme = () => setIsDark(prev => !prev);
+  // Listen for system preference changes
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const handleChange = (e) => {
+      try {
+        const stored = localStorage.getItem('archivex-theme');
+        if (!stored) {
+          setIsDark(e.matches);
+        }
+      } catch {}
+    };
+    mediaQuery.addEventListener('change', handleChange);
+    return () => mediaQuery.removeEventListener('change', handleChange);
+  }, []);
+
+  const toggleTheme = useCallback(() => setIsDark(prev => !prev), []);
 
   return (
     <ThemeContext.Provider value={{ isDark, toggleTheme }}>

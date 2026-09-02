@@ -1,15 +1,14 @@
-import React from 'react';
 import { motion } from 'framer-motion';
 
 const variantStyles = {
   primary: {
-    base: 'text-white border-transparent',
+    base: 'text-(--color-on-primary) border-transparent',
     bg: 'bg-(--color-primary) hover:bg-(--color-primary-hover)',
-    shadow: 'shadow-[0_0_16px_rgba(99,102,241,0.35)]',
+    shadow: '',
   },
   secondary: {
     base: 'text-(--color-text-primary) border-(--color-border)',
-    bg: 'bg-(--color-surface-alt) hover:bg-(--color-border)',
+    bg: 'bg-(--color-surface-alt) hover:bg-(--color-surface-dim)',
     shadow: '',
   },
   outline: {
@@ -24,20 +23,27 @@ const variantStyles = {
   },
   danger: {
     base: 'text-white border-transparent',
-    bg: 'bg-(--color-error) hover:opacity-90',
+    bg: 'bg-(--color-error) hover:bg-(--color-error-hover)',
     shadow: '',
   },
   accent: {
-    base: 'text-white border-transparent',
+    base: 'text-(--color-on-accent) border-transparent',
     bg: 'bg-(--color-accent) hover:bg-(--color-accent-hover)',
-    shadow: 'shadow-[0_0_16px_rgba(6,182,212,0.3)]',
+    shadow: 'shadow-[0_0_16px_rgba(129,140,248,0.3)]',
+  },
+  success: {
+    base: 'text-white border-transparent',
+    bg: 'bg-(--color-success) hover:bg-(--color-success-hover)',
+    shadow: '',
   },
 };
 
 const sizeStyles = {
+  xs: 'h-7 px-2.5 text-[11px] gap-1',
   sm: 'h-8 px-3 text-xs gap-1.5',
   md: 'h-10 px-4 text-sm gap-2',
   lg: 'h-12 px-6 text-base gap-2.5',
+  xl: 'h-14 px-8 text-base gap-3',
 };
 
 export default function Button({
@@ -61,26 +67,26 @@ export default function Button({
       type={type}
       onClick={onClick}
       disabled={disabled || loading}
-      whileTap={{ scale: 0.97 }}
-      whileHover={{ scale: 1.02 }}
+      whileTap={{ scale: disabled ? 1 : 0.96 }}
+      whileHover={{ scale: disabled ? 1 : 1.02 }}
       className={[
-        'inline-flex items-center justify-center font-medium rounded-md border',
-        'transition-all duration-(--transition-fast) cursor-pointer select-none',
-        'disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none',
+        'inline-flex items-center justify-center font-medium rounded-lg border',
+        'transition-colors duration-200 cursor-pointer select-none',
+        'disabled:opacity-45 disabled:cursor-not-allowed disabled:transform-none',
         v.base, v.bg, v.shadow, s, className,
       ].join(' ')}
       {...rest}
     >
       {loading ? (
-        <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
+        <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none" aria-hidden="true">
           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
           <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
         </svg>
       ) : icon ? (
-        <span className="shrink-0">{icon}</span>
+        <span className="shrink-0" aria-hidden="true">{icon}</span>
       ) : null}
       {children}
-      {iconRight && !loading && <span className="shrink-0">{iconRight}</span>}
+      {iconRight && !loading && <span className="shrink-0" aria-hidden="true">{iconRight}</span>}
     </motion.button>
   );
 }
