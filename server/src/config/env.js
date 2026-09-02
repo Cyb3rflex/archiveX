@@ -9,7 +9,7 @@ require('dotenv').config();
 /**
  * Validates that a required environment variable is present.
  * @param {string} name - The variable name
- * @returns {string} The value
+ * @returns {string}
  */
 function requireEnv(name) {
   const value = process.env[name];

@@ -36,8 +36,6 @@ app.use(
 // ──────────────────────────────────────────────
 // Request logging
 // ──────────────────────────────────────────────
-// Use 'dev' format in development (colourful, concise) and
-// 'combined' in production (Apache-style, full detail for log aggregators)
 app.use(morgan(config.isDevelopment ? 'dev' : 'combined'));
 
 // ──────────────────────────────────────────────

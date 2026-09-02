@@ -1,16 +1,143 @@
-# React + Vite
+# ArchiveX Admin Dashboard
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+The administrative interface for **ArchiveX** — a digital archive for university past examination questions.
 
-Currently, two official plugins are available:
+This dashboard is used by administrators to manage faculties, departments, levels, semesters, courses, past question PDFs, and administrator accounts.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+---
 
-## React Compiler
+## Tech Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **React 19** — UI library
+- **Vite 8** — Build tool & dev server
+- **React Router DOM** — Client-side routing
+- **Tailwind CSS v4** — Utility-first styling
+- **Lucide React** — Icon library
 
-## Expanding the Oxlint configuration
+---
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+## Project Structure
+
+```
+src/
+├── App.jsx                       # Root component with router
+├── main.jsx                      # Entry point
+├── index.css                     # Global styles + design tokens
+├── context/
+│   └── AuthContext.jsx           # Authentication state
+├── components/
+│   ├── auth/
+│   │   └── ProtectedRoute.jsx    # Route guard
+│   ├── layout/
+│   │   ├── Layout.jsx            # Sidebar + main layout
+│   │   └── Header.jsx            # Top bar with user info
+│   ├── dashboard/
+│   │   ├── RecentActivity.jsx    # Recent uploads list
+│   │   └── QuickActions.jsx      # Quick action shortcuts
+│   └── ui/
+│       ├── Badge.jsx
+│       ├── Button.jsx
+│       ├── EmptyState.jsx
+│       ├── Input.jsx
+│       ├── LoadingState.jsx
+│       ├── Modal.jsx
+│       ├── SearchBar.jsx
+│       ├── Select.jsx
+│       └── StatCard.jsx
+└── pages/
+    ├── auth/
+    │   └── Login.jsx
+    ├── Dashboard.jsx
+    ├── Faculties.jsx
+    ├── Departments.jsx
+    ├── Levels.jsx
+    ├── Semesters.jsx
+    ├── Courses.jsx
+    ├── PastQuestions.jsx
+    └── Users.jsx                 # Super Admin only
+```
+
+---
+
+## Features
+
+### Authentication
+- Secure login form
+- JWT-based session management
+- Protected routes
+- Logout
+
+### Dashboard
+- Summary statistics (Faculties, Departments, Courses, Past Questions)
+- Recent uploads list
+- Quick action shortcuts
+- Branded summary card
+
+### Entity Management (CRUD)
+- **Faculties** — Create, edit, delete, search
+- **Departments** — Create, edit, delete, search (with faculty filter)
+- **Levels** — Create, edit, delete, search
+- **Semesters** — Create, edit, delete, search
+- **Courses** — Create, edit, delete, search (with all related entities)
+- **Past Questions** — Upload PDF, edit metadata, delete, search
+- **Administrators** — Create admins, manage roles (Super Admin only)
+
+### UI/UX
+- Responsive design (mobile, tablet, desktop)
+- Collapsible sidebar on mobile
+- Loading & empty states
+- Success & error notifications
+- Search bars on every list page
+- Modal-based forms
+- Smooth animations & transitions
+- Accessible focus states
+
+---
+
+## Getting Started
+
+### Install Dependencies
+
+```bash
+npm install
+```
+
+### Run Development Server
+
+```bash
+npm run dev
+```
+
+The app will be available at `http://localhost:5173`.
+
+### Build for Production
+
+```bash
+npm run build
+```
+
+### Preview Production Build
+
+```bash
+npm run preview
+```
+
+---
+
+## Environment
+
+The dashboard expects a backend API at `/api/v1` (configured in the AuthContext). For local development, the Vite dev server proxies `/api/*` requests to the backend.
+
+For demo purposes, the login accepts any credentials and falls back to a mock admin user.
+
+---
+
+## Design System
+
+Colors, typography, and other design tokens are defined in `src/index.css` as CSS custom properties. The dashboard follows the ArchiveX UI/UX guidelines (Inter font, blue primary color, accessible contrast, soft rounded corners).
+
+---
+
+## License
+
+MIT — same as the parent ArchiveX project.

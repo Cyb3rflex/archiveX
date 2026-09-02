@@ -61,7 +61,7 @@ export default function Footer() {
             </div>
 
             {/* Column 3: System */}
-            <div className="flex flex-col gap-3">
+            {/* <div className="flex flex-col gap-3">
               <h4 className="text-xs font-bold uppercase tracking-wider text-(--color-text-primary)">
                 System
               </h4>
@@ -80,12 +80,12 @@ export default function Footer() {
                 <span className="w-2 h-2 rounded-full bg-(--color-success) animate-pulse" />
                 Systems Operational
               </span>
-            </div>
+            </div> */}
           </div>
         </div>
 
         {/* Bottom Social Bar */}
-        <div className="mt-10 pt-6 border-t border-(--color-border) flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-(--color-text-muted)">
+        {/* <div className="mt-10 pt-6 border-t border-(--color-border) flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-(--color-text-muted)">
           <p>Designed for university students with speed and precision.</p>
           <div className="flex items-center gap-4">
             <a
@@ -107,7 +107,7 @@ export default function Footer() {
               <Share2 size={16} />
             </a>
           </div>
-        </div>
+        </div> */}
       </div>
     </footer>
   );
