@@ -2,7 +2,7 @@
 
 'use strict';
 
-const prisma = require('../config/database');
+const supabaseAdmin = require('../lib/supabase-admin');
 const { successResponse } = require('../utils/api-response');
 const AppError = require('../utils/app-error');
 const { log } = require('../services/audit.service');
@@ -12,38 +12,49 @@ async function getAll(req, res, next) {
   try {
     const { departmentId, levelId, semesterId, search } = req.query;
 
-    const where = {};
-    if (departmentId) where.departmentId = departmentId;
-    if (levelId) where.levelId = levelId;
-    if (semesterId) where.semesterId = semesterId;
+    let query = supabaseAdmin
+      .from('courses')
+      .select(`
+        id,
+        department_id,
+        level_id,
+        semester_id,
+        course_code,
+        course_title,
+        slug,
+        created_at,
+        updated_at,
+        department:departments(id, name),
+        level:levels(id, name),
+        semester:semesters(id, name),
+        pastQuestions:past_questions(count)
+      `)
+      .order('course_code', { ascending: true });
+
+    if (departmentId) query = query.eq('department_id', departmentId);
+    if (levelId) query = query.eq('level_id', levelId);
+    if (semesterId) query = query.eq('semester_id', semesterId);
     if (search) {
-      where.OR = [
-        { courseCode: { contains: search, mode: 'insensitive' } },
-        { courseTitle: { contains: search, mode: 'insensitive' } },
-      ];
+      query = query.or(`course_code.ilike.%${search}%,course_title.ilike.%${search}%`);
     }
 
-    const courses = await prisma.course.findMany({
-      where,
-      orderBy: [{ courseCode: 'asc' }],
-      include: {
-        department: { select: { id: true, name: true } },
-        level: { select: { id: true, name: true } },
-        semester: { select: { id: true, name: true } },
-        _count: { select: { pastQuestions: true } },
-      },
-    });
+    const { data: courses, error } = await query;
+    if (error) throw new AppError(error.message, 500);
 
-    const data = courses.map((c) => ({
-      ...c,
-      departmentName: c.department.name,
-      levelName: c.level.name,
-      semesterName: c.semester.name,
-      department: undefined,
-      level: undefined,
-      semester: undefined,
-      pastQuestionCount: c._count.pastQuestions,
-      _count: undefined,
+    const data = (courses || []).map((c) => ({
+      id: c.id,
+      departmentId: c.department_id,
+      levelId: c.level_id,
+      semesterId: c.semester_id,
+      courseCode: c.course_code,
+      courseTitle: c.course_title,
+      slug: c.slug,
+      createdAt: c.created_at,
+      updatedAt: c.updated_at,
+      departmentName: c.department?.name || '',
+      levelName: c.level?.name || '',
+      semesterName: c.semester?.name || '',
+      pastQuestionCount: c.pastQuestions?.[0]?.count ?? 0,
     }));
 
     return successResponse(res, 'Courses retrieved.', data);
@@ -55,20 +66,57 @@ async function getAll(req, res, next) {
 // GET /courses/:id
 async function getOne(req, res, next) {
   try {
-    const course = await prisma.course.findUnique({
-      where: { id: req.params.id },
-      include: {
-        department: { select: { id: true, name: true, slug: true } },
-        level: { select: { id: true, name: true } },
-        semester: { select: { id: true, name: true } },
-        pastQuestions: {
-          orderBy: [{ year: 'desc' }, { session: 'desc' }],
-          select: { id: true, year: true, session: true, examType: true, downloads: true, createdAt: true },
-        },
-      },
-    });
+    const { data: course, error } = await supabaseAdmin
+      .from('courses')
+      .select(`
+        id,
+        department_id,
+        level_id,
+        semester_id,
+        course_code,
+        course_title,
+        slug,
+        created_at,
+        updated_at,
+        department:departments(id, name, slug),
+        level:levels(id, name),
+        semester:semesters(id, name),
+        pastQuestions:past_questions(id, year, session, exam_type, downloads, created_at)
+      `)
+      .eq('id', req.params.id)
+      .maybeSingle();
+
+    if (error) throw new AppError(error.message, 500);
     if (!course) throw new AppError('Course not found.', 404);
-    return successResponse(res, 'Course retrieved.', course);
+
+    const pastQuestions = (course.pastQuestions || [])
+      .map((q) => ({
+        id: q.id,
+        year: q.year,
+        session: q.session,
+        examType: q.exam_type,
+        downloads: q.downloads,
+        createdAt: q.created_at,
+      }))
+      .sort((a, b) => b.year - a.year || b.session.localeCompare(a.session));
+
+    const formatted = {
+      id: course.id,
+      departmentId: course.department_id,
+      levelId: course.level_id,
+      semesterId: course.semester_id,
+      courseCode: course.course_code,
+      courseTitle: course.course_title,
+      slug: course.slug,
+      createdAt: course.created_at,
+      updatedAt: course.updated_at,
+      department: course.department,
+      level: course.level,
+      semester: course.semester,
+      pastQuestions,
+    };
+
+    return successResponse(res, 'Course retrieved.', formatted);
   } catch (err) {
     return next(err);
   }
@@ -78,18 +126,49 @@ async function getOne(req, res, next) {
 async function create(req, res, next) {
   try {
     const { courseCode, courseTitle, departmentId, levelId, semesterId, slug } = req.body;
-    const course = await prisma.course.create({
-      data: { courseCode, courseTitle, departmentId, levelId, semesterId, slug },
-    });
+
+    const { data: course, error } = await supabaseAdmin
+      .from('courses')
+      .insert({
+        course_code: courseCode,
+        course_title: courseTitle,
+        department_id: departmentId,
+        level_id: levelId,
+        semester_id: semesterId,
+        slug,
+      })
+      .select('id, department_id, level_id, semester_id, course_code, course_title, slug, created_at, updated_at')
+      .single();
+
+    if (error) {
+      if (error.code === '23505') {
+        throw new AppError('Course with this code/details or slug already exists.', 409);
+      }
+      throw new AppError(error.message, 500);
+    }
+
+    const formatted = {
+      id: course.id,
+      departmentId: course.department_id,
+      levelId: course.level_id,
+      semesterId: course.semester_id,
+      courseCode: course.course_code,
+      courseTitle: course.course_title,
+      slug: course.slug,
+      createdAt: course.created_at,
+      updatedAt: course.updated_at,
+    };
+
     log({
       action: 'course.create',
       userId: req.user.id,
       userEmail: req.user.email,
       resource: 'course',
-      resourceId: course.id,
+      resourceId: formatted.id,
       metadata: { courseCode, courseTitle },
     });
-    return successResponse(res, 'Course created.', course, 201);
+
+    return successResponse(res, 'Course created.', formatted, 201);
   } catch (err) {
     return next(err);
   }
@@ -99,12 +178,51 @@ async function create(req, res, next) {
 async function update(req, res, next) {
   try {
     const { courseCode, courseTitle, departmentId, levelId, semesterId, slug } = req.body;
-    const course = await prisma.course.update({
-      where: { id: req.params.id },
-      data: { courseCode, courseTitle, departmentId, levelId, semesterId, slug },
+    const updateData = {};
+    if (courseCode !== undefined) updateData.course_code = courseCode;
+    if (courseTitle !== undefined) updateData.course_title = courseTitle;
+    if (departmentId !== undefined) updateData.department_id = departmentId;
+    if (levelId !== undefined) updateData.level_id = levelId;
+    if (semesterId !== undefined) updateData.semester_id = semesterId;
+    if (slug !== undefined) updateData.slug = slug;
+
+    const { data: course, error } = await supabaseAdmin
+      .from('courses')
+      .update(updateData)
+      .eq('id', req.params.id)
+      .select('id, department_id, level_id, semester_id, course_code, course_title, slug, created_at, updated_at')
+      .single();
+
+    if (error) {
+      if (error.code === '23505') {
+        throw new AppError('Course with this code/details or slug already exists.', 409);
+      }
+      throw new AppError(error.message, 500);
+    }
+    if (!course) throw new AppError('Course not found.', 404);
+
+    const formatted = {
+      id: course.id,
+      departmentId: course.department_id,
+      levelId: course.level_id,
+      semesterId: course.semester_id,
+      courseCode: course.course_code,
+      courseTitle: course.course_title,
+      slug: course.slug,
+      createdAt: course.created_at,
+      updatedAt: course.updated_at,
+    };
+
+    log({
+      action: 'course.update',
+      userId: req.user.id,
+      userEmail: req.user.email,
+      resource: 'course',
+      resourceId: course.id,
+      metadata: { courseCode, courseTitle },
     });
-    log({ action: 'course.update', userId: req.user.id, userEmail: req.user.email, resource: 'course', resourceId: course.id });
-    return successResponse(res, 'Course updated.', course);
+
+    return successResponse(res, 'Course updated.', formatted);
   } catch (err) {
     return next(err);
   }
@@ -113,8 +231,26 @@ async function update(req, res, next) {
 // DELETE /courses/:id
 async function remove(req, res, next) {
   try {
-    await prisma.course.delete({ where: { id: req.params.id } });
-    log({ action: 'course.delete', userId: req.user.id, userEmail: req.user.email, resource: 'course', resourceId: req.params.id });
+    const { error } = await supabaseAdmin
+      .from('courses')
+      .delete()
+      .eq('id', req.params.id);
+
+    if (error) {
+      if (error.code === '23503') {
+        throw new AppError('Cannot delete course because it has past questions attached.', 409);
+      }
+      throw new AppError(error.message, 500);
+    }
+
+    log({
+      action: 'course.delete',
+      userId: req.user.id,
+      userEmail: req.user.email,
+      resource: 'course',
+      resourceId: req.params.id,
+    });
+
     return successResponse(res, 'Course deleted.');
   } catch (err) {
     return next(err);

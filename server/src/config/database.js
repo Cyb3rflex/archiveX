@@ -1,17 +1,15 @@
-// Singleton PrismaClient instance.
-// Importing this module from anywhere in the app returns the same client —
-// prevents exhausting the database connection pool by accidentally instantiating
-// multiple clients.
+// Supabase client instance for public server.
 
 'use strict';
 
-const { PrismaClient } = require('@prisma/client');
+const { createClient } = require('@supabase/supabase-js');
+const config = require('./env');
 
-const prisma = new PrismaClient({
-  log:
-    process.env.NODE_ENV === 'development'
-      ? ['query', 'info', 'warn', 'error']
-      : ['warn', 'error'],
-});
+const supabaseKey = config.supabaseServiceRoleKey || config.supabaseAnonKey;
+const supabase = config.supabaseUrl && supabaseKey
+  ? createClient(config.supabaseUrl, supabaseKey, {
+      auth: { autoRefreshToken: false, persistSession: false },
+    })
+  : null;
 
-module.exports = prisma;
+module.exports = supabase;

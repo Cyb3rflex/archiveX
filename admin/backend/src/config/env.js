@@ -35,18 +35,18 @@ const config = {
   isProduction: optionalEnv('NODE_ENV', 'development') === 'production',
   isDevelopment: optionalEnv('NODE_ENV', 'development') === 'development',
 
-  // Database
-  databaseUrl: requireEnv('DATABASE_URL'),
+  // Database (legacy / optional)
+  databaseUrl: optionalEnv('DATABASE_URL', ''),
   directUrl: optionalEnv('DIRECT_URL', process.env.DATABASE_URL || ''),
 
   // Supabase
-  supabaseUrl: requireEnv('SUPABASE_URL'),
-  supabaseServiceRoleKey: requireEnv('SUPABASE_SERVICE_ROLE_KEY'),
-  supabaseAnonKey: optionalEnv('SUPABASE_ANON_KEY', ''),
+  supabaseUrl: optionalEnv('SUPABASE_URL', ''),
+  supabaseServiceRoleKey: optionalEnv('SUPABASE_SERVICE_ROLE_KEY', process.env.SUPABASE_SECRET_KEY || ''),
+  supabaseAnonKey: optionalEnv('SUPABASE_ANON_KEY', process.env.SUPABASE_PUBLISHABLE_KEY || ''),
   storageBucket: optionalEnv('STORAGE_BUCKET', 'past-questions'),
 
   // JWT
-  jwtSecret: requireEnv('JWT_SECRET'),
+  jwtSecret: optionalEnv('JWT_SECRET', 'dev-secret-change-in-production'),
   jwtExpiresIn: optionalEnv('JWT_EXPIRES_IN', '7d'),
 
   // CORS

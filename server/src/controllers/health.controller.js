@@ -1,10 +1,9 @@
-// Health check controller.
-// Performs a real database connectivity test via Supabase — does not simply return a static string.
-// If the database is unreachable, the endpoint responds with HTTP 503 Service Unavailable.
+// Health check controller for ArchiveX public server.
+// Checks server health and Supabase database connectivity.
 
 'use strict';
 
-const supabaseAdmin = require('../lib/supabase-admin');
+const supabase = require('../config/database');
 const { successResponse, errorResponse } = require('../utils/api-response');
 
 /**
@@ -15,8 +14,14 @@ const { successResponse, errorResponse } = require('../utils/api-response');
  */
 async function healthCheck(_req, res) {
   try {
-    // Execute a minimal query to verify the database connection is live
-    const { error } = await supabaseAdmin.from('faculties').select('id').limit(1);
+    if (!supabase) {
+      return successResponse(res, 'ArchiveX API is running (Supabase not configured)', {
+        database: 'unconfigured',
+      });
+    }
+
+    // Ping Supabase with a lightweight query to verify connectivity
+    const { error } = await supabase.from('faculties').select('id').limit(1);
 
     if (error) {
       console.error('[Health] Database connectivity check failed:', error.message);
@@ -31,14 +36,15 @@ async function healthCheck(_req, res) {
       database: 'connected',
     });
   } catch (err) {
-    console.error('[Health] Database connectivity check failed:', err.message);
+    console.error('[Health] Unexpected error during health check:', err.message);
 
     return errorResponse(
       res,
-      'ArchiveX API is running, but the database is unavailable.',
+      'ArchiveX API is running, but health check failed.',
       503,
     );
   }
 }
 
 module.exports = { healthCheck };
+
