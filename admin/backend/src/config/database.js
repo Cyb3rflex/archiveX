@@ -1,17 +1,7 @@
-// Singleton PrismaClient instance.
-// Importing this module from anywhere in the app returns the same client —
-// prevents exhausting the database connection pool by accidentally instantiating
-// multiple clients.
+// Database client — re-exports the Supabase admin client.
 
 'use strict';
 
-const { PrismaClient } = require('@prisma/client');
+const supabaseAdmin = require('../lib/supabase-admin');
 
-const prisma = new PrismaClient({
-  log:
-    process.env.NODE_ENV === 'development'
-      ? ['query', 'info', 'warn', 'error']
-      : ['warn', 'error'],
-});
-
-module.exports = prisma;
+module.exports = supabaseAdmin;

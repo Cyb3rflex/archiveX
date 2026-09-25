@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
@@ -11,13 +11,14 @@ import {
   Layers,
   Calendar,
   Sparkles,
-  Star,
   CheckCircle2,
+
   FileText,
   Users,
   Shield,
 } from 'lucide-react';
 import PastQuestionCard from '../components/cards/PastQuestionCard';
+import LoadingState from '../components/ui/LoadingState';
 import {
   BookStack,
   LibraryShelf,
@@ -25,7 +26,8 @@ import {
   PDFDocument,
   GraduationCap as GradCap,
 } from '../components/illustrations/BookIllustration';
-import { getRecentlyAdded } from '../data/mockData';
+import { getRecentPastQuestions } from '../services/api';
+
 
 const STATS = [
   { icon: BookOpen, value: '17+', label: 'Available Courses', color: 'var(--color-accent)' },
@@ -107,8 +109,28 @@ const stagger = {
 
 export default function Home() {
   const [query, setQuery] = useState('');
+  const [recentlyAdded, setRecentlyAdded] = useState([]);
+  const [loadingRecent, setLoadingRecent] = useState(true);
   const navigate = useNavigate();
-  const recentlyAdded = useMemo(() => getRecentlyAdded(4), []);
+
+  useEffect(() => {
+    let mounted = true;
+    getRecentPastQuestions(4)
+      .then((data) => {
+        if (mounted) {
+          setRecentlyAdded(data || []);
+          setLoadingRecent(false);
+        }
+      })
+      .catch((err) => {
+        console.error('Error fetching recent questions:', err);
+        if (mounted) setLoadingRecent(false);
+      });
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -403,19 +425,28 @@ export default function Home() {
             </Link>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
-            {recentlyAdded.map((pq, idx) => (
-              <PastQuestionCard
-                key={pq.id}
-                pq={pq}
-                _courseSlug={pq.course?.slug}
-                variant="grid"
-                index={idx}
-              />
-            ))}
-          </div>
+          {loadingRecent ? (
+            <LoadingState label="Loading recent past questions…" />
+          ) : recentlyAdded.length === 0 ? (
+            <div className="py-12 text-center text-(--color-text-muted) text-sm bg-(--color-surface) rounded-xl border border-(--color-border)">
+              No past questions uploaded yet. Check back soon!
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
+              {recentlyAdded.map((pq, idx) => (
+                <PastQuestionCard
+                  key={pq.id}
+                  pq={pq}
+                  _courseSlug={pq.course?.slug}
+                  variant="grid"
+                  index={idx}
+                />
+              ))}
+            </div>
+          )}
         </div>
       </section>
+
 
       {/* ─── FEATURES SECTION ─── */}
       <section className="w-full py-16 sm:py-20 md:py-28 border-t border-(--color-border-subtle) bg-(--color-surface-alt)/40 relative overflow-hidden">

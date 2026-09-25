@@ -8,8 +8,9 @@ import FacultyCard from '../components/cards/FacultyCard';
 import DepartmentCard from '../components/cards/DepartmentCard';
 import CourseCard from '../components/cards/CourseCard';
 import EmptyState from '../components/ui/EmptyState';
+import LoadingState from '../components/ui/LoadingState';
 import SectionHeader from '../components/ui/SectionHeader';
-import { faculties, departments, courses, searchAll } from '../data/mockData';
+import { getFaculties, getDepartments, getCourses, searchAll } from '../services/api';
 
 const TABS = [
   { id: 'all', label: 'All Archive', icon: Search },
@@ -29,6 +30,36 @@ export default function Browse() {
   const [activeTab, setActiveTab] = useState(initialTab);
   const [selectedLevel, setSelectedLevel] = useState(initialLevel);
 
+  const [facultiesList, setFacultiesList] = useState([]);
+  const [departmentsList, setDepartmentsList] = useState([]);
+  const [coursesList, setCoursesList] = useState([]);
+  const [searchResults, setSearchResults] = useState({ courses: [], pastQuestions: [] });
+  const [loading, setLoading] = useState(true);
+  const [searching, setSearching] = useState(false);
+
+  // Load initial faculties, departments, courses from DB
+  useEffect(() => {
+    let mounted = true;
+    Promise.all([getFaculties(), getDepartments(), getCourses()])
+      .then(([fData, dData, cData]) => {
+        if (mounted) {
+          setFacultiesList(fData || []);
+          setDepartmentsList(dData || []);
+          setCoursesList(cData || []);
+          setLoading(false);
+        }
+      })
+      .catch((err) => {
+        console.error('Error loading browse data:', err);
+        if (mounted) setLoading(false);
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  // Sync URL search params
   useEffect(() => {
     const qParam = searchParams.get('q');
     if (qParam !== null) setQuery(qParam);
@@ -38,9 +69,37 @@ export default function Browse() {
     if (lvlParam) setSelectedLevel(lvlParam);
   }, [searchParams]);
 
-  const results = useMemo(() => searchAll(query), [query]);
+  // Execute search against API when query changes
+  useEffect(() => {
+    let mounted = true;
+    if (!query.trim()) {
+      setSearchResults({ courses: [], pastQuestions: [] });
+      setSearching(false);
+      return;
+    }
+
+    setSearching(true);
+    const timer = setTimeout(() => {
+      searchAll(query)
+        .then((res) => {
+          if (mounted) {
+            setSearchResults(res || { courses: [], pastQuestions: [] });
+            setSearching(false);
+          }
+        })
+        .catch(() => {
+          if (mounted) setSearching(false);
+        });
+    }, 250);
+
+    return () => {
+      mounted = false;
+      clearTimeout(timer);
+    };
+  }, [query]);
+
   const hasQuery = query.trim().length > 0;
-  const hasResults = results.courses.length > 0 || results.pastQuestions.length > 0;
+  const hasResults = searchResults.courses.length > 0 || searchResults.pastQuestions.length > 0;
 
   const handleQueryChange = (val) => {
     setQuery(val);
@@ -65,9 +124,9 @@ export default function Browse() {
   };
 
   const filteredCoursesByLevel = useMemo(() => {
-    if (!selectedLevel) return courses;
-    return courses.filter((c) => c.level === Number(selectedLevel));
-  }, [selectedLevel]);
+    if (!selectedLevel) return coursesList;
+    return coursesList.filter((c) => c.level === Number(selectedLevel));
+  }, [selectedLevel, coursesList]);
 
   return (
     <main>
@@ -100,24 +159,25 @@ export default function Browse() {
             />
           </div>
 
+          {/* Navigation Tabs */}
           {!hasQuery && (
-            <div className="flex flex-wrap items-center gap-2 border-b border-(--color-border) pb-3">
-              {TABS.map(({ id, label, icon: Icon }) => {
-                const isActive = activeTab === id;
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 border-b border-(--color-border) no-scrollbar">
+              {TABS.map((tab) => {
+                const Icon = tab.icon;
+                const isActive = activeTab === tab.id;
                 return (
                   <button
-                    key={id}
-                    type="button"
-                    onClick={() => handleTabChange(id)}
+                    key={tab.id}
+                    onClick={() => handleTabChange(tab.id)}
                     className={[
-                      'flex items-center gap-2 px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all cursor-pointer',
+                      'flex items-center gap-2 px-4 py-2.5 rounded-lg text-xs sm:text-sm font-semibold transition-all whitespace-nowrap cursor-pointer',
                       isActive
-                        ? 'bg-(--color-primary) text-(--color-on-primary) shadow-sm'
-                        : 'text-(--color-text-secondary) hover:text-(--color-text-primary) hover:bg-(--color-surface-alt)',
+                        ? 'bg-(--color-primary-muted) text-(--color-primary)'
+                        : 'text-(--color-text-secondary) hover:text-(--color-text-primary) hover:bg-(--color-surface)',
                     ].join(' ')}
                   >
-                    <Icon size={15} />
-                    <span>{label}</span>
+                    <Icon size={16} />
+                    {tab.label}
                   </button>
                 );
               })}
@@ -125,43 +185,98 @@ export default function Browse() {
           )}
         </div>
 
-        {/* Dynamic Content */}
-        {hasQuery ? (
-          /* ─── Search results ─── */
-          <motion.div
-            key="results"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.3 }}
-          >
-            {!hasResults ? (
+        {/* Loading State for main data */}
+        {loading && !hasQuery && (
+          <LoadingState label="Loading academic archive from database…" />
+        )}
+
+        {/* ─── SEARCH RESULTS VIEW ─── */}
+        {!loading && hasQuery && (
+          <div>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-bold text-(--color-text-primary)">
+                Search Results for &ldquo;{query}&rdquo;
+              </h2>
+              <span className="text-xs text-(--color-text-muted)">
+                {searchResults.courses.length} courses · {searchResults.pastQuestions.length} past questions
+              </span>
+            </div>
+
+            {searching ? (
+              <LoadingState label="Searching archive…" />
+            ) : !hasResults ? (
               <EmptyState
                 icon={Search}
-                title="No past questions or courses found"
-                description={`We couldn't find anything matching "${query}". Try searching a course code like CSC201 or a department.`}
-                action={() => handleQueryChange('')}
-                actionLabel="Clear search"
+                title="No matching results"
+                description={`We couldn't find any courses or past questions matching "${query}". Try searching by course code (e.g. CSC101) or broader keywords.`}
+                actionLabel="Clear Search"
+                onAction={() => handleQueryChange('')}
               />
             ) : (
               <div className="space-y-10">
-                {results.courses.length > 0 && (
+                {/* Matched Courses */}
+                {searchResults.courses.length > 0 && (
                   <div>
                     <SectionHeader
-                      title="Matched Courses"
-                      subtitle={`${results.courses.length} course${results.courses.length > 1 ? 's' : ''} found`}
+                      title="Courses"
+                      subtitle={`${searchResults.courses.length} course${searchResults.courses.length !== 1 ? 's' : ''} found`}
                     />
                     <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {results.courses.map((course) => (
+                      {searchResults.courses.map((course) => (
                         <CourseCard key={course.id} course={course} />
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Matched Past Questions */}
+                {searchResults.pastQuestions.length > 0 && (
+                  <div>
+                    <SectionHeader
+                      title="Past Examination Papers"
+                      subtitle={`${searchResults.pastQuestions.length} paper${searchResults.pastQuestions.length !== 1 ? 's' : ''} found`}
+                    />
+                    <div className="space-y-3">
+                      {searchResults.pastQuestions.map((pq) => (
+                        <Link
+                          key={pq.id}
+                          to={`/past-question/${pq.id}`}
+                          className="flex items-center justify-between p-4 rounded-xl bg-(--color-surface) border border-(--color-border) hover:border-(--color-primary) hover:shadow-(--shadow-glow-primary) transition-all group"
+                        >
+                          <div className="flex items-center gap-4 min-w-0">
+                            <div className="shrink-0 p-2 rounded-lg bg-(--color-primary-muted) text-(--color-primary)">
+                              <BookCover size={24} />
+                            </div>
+                            <div className="min-w-0">
+                              <div className="flex items-center gap-2 flex-wrap mb-1">
+                                <span className="font-bold text-sm text-(--color-text-primary) group-hover:text-(--color-primary) transition-colors">
+                                  {pq.course?.code || 'Past Question'}
+                                </span>
+                                <span className="text-xs px-2 py-0.5 rounded bg-(--color-surface-alt) text-(--color-text-muted)">
+                                  {pq.session}
+                                </span>
+                                <span className="text-xs px-2 py-0.5 rounded bg-(--color-surface-alt) text-(--color-text-muted)">
+                                  {pq.examType}
+                                </span>
+                              </div>
+                              <p className="text-xs text-(--color-text-secondary) truncate">
+                                {pq.fileName}
+                              </p>
+                            </div>
+                          </div>
+                          <ArrowRight size={16} className="text-(--color-text-muted) group-hover:text-(--color-primary) group-hover:translate-x-1 transition-all shrink-0 ml-4" />
+                        </Link>
                       ))}
                     </div>
                   </div>
                 )}
               </div>
             )}
-          </motion.div>
-        ) : (
-          /* ─── Tabbed views ─── */
+          </div>
+        )}
+
+        {/* ─── TAB CONTENT (WHEN NOT SEARCHING) ─── */}
+        {!loading && !hasQuery && (
           <AnimatePresence mode="wait">
             {activeTab === 'faculty' && (
               <motion.div
@@ -175,11 +290,17 @@ export default function Browse() {
                   title="Faculties Directory"
                   subtitle="Select a faculty to explore affiliated departments and courses"
                 />
-                <div className="grid sm:grid-cols-2 gap-5">
-                  {faculties.map((faculty) => (
-                    <FacultyCard key={faculty.id} faculty={faculty} />
-                  ))}
-                </div>
+                {facultiesList.length === 0 ? (
+                  <div className="py-12 text-center text-(--color-text-muted) text-sm bg-(--color-surface) rounded-xl border border-(--color-border)">
+                    No faculties found in the database.
+                  </div>
+                ) : (
+                  <div className="grid sm:grid-cols-2 gap-5">
+                    {facultiesList.map((faculty) => (
+                      <FacultyCard key={faculty.id} faculty={faculty} />
+                    ))}
+                  </div>
+                )}
               </motion.div>
             )}
 
@@ -195,11 +316,17 @@ export default function Browse() {
                   title="Departments Directory"
                   subtitle="Browse all academic departments across faculties"
                 />
-                <div className="grid sm:grid-cols-2 gap-5">
-                  {departments.map((dept) => (
-                    <DepartmentCard key={dept.id} department={dept} />
-                  ))}
-                </div>
+                {departmentsList.length === 0 ? (
+                  <div className="py-12 text-center text-(--color-text-muted) text-sm bg-(--color-surface) rounded-xl border border-(--color-border)">
+                    No departments found in the database.
+                  </div>
+                ) : (
+                  <div className="grid sm:grid-cols-2 gap-5">
+                    {departmentsList.map((dept) => (
+                      <DepartmentCard key={dept.id} department={dept} />
+                    ))}
+                  </div>
+                )}
               </motion.div>
             )}
 
@@ -230,7 +357,7 @@ export default function Browse() {
                   >
                     All Levels
                   </button>
-                  {[100, 200, 300, 400].map((lvl) => (
+                  {[100, 200, 300, 400, 500].map((lvl) => (
                     <button
                       key={lvl}
                       type="button"
@@ -247,11 +374,17 @@ export default function Browse() {
                   ))}
                 </div>
 
-                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {filteredCoursesByLevel.map((course) => (
-                    <CourseCard key={course.id} course={course} />
-                  ))}
-                </div>
+                {filteredCoursesByLevel.length === 0 ? (
+                  <div className="py-12 text-center text-(--color-text-muted) text-sm bg-(--color-surface) rounded-xl border border-(--color-border)">
+                    No courses found for this level in the database.
+                  </div>
+                ) : (
+                  <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {filteredCoursesByLevel.map((course) => (
+                      <CourseCard key={course.id} course={course} />
+                    ))}
+                  </div>
+                )}
               </motion.div>
             )}
 
@@ -278,9 +411,9 @@ export default function Browse() {
                       Mid-session exam papers, tests, and standard first semester course materials.
                     </p>
                     <div className="space-y-2.5">
-                      {courses
+                      {coursesList
                         .filter((c) => c.semester === 1)
-                        .slice(0, 4)
+                        .slice(0, 5)
                         .map((course) => (
                           <Link
                             key={course.id}
@@ -292,6 +425,9 @@ export default function Browse() {
                             <ArrowRight size={14} className="text-(--color-text-muted) group-hover:text-(--color-primary) group-hover:translate-x-1 transition-transform" />
                           </Link>
                         ))}
+                      {coursesList.filter((c) => c.semester === 1).length === 0 && (
+                        <p className="text-xs text-(--color-text-muted) py-4 text-center">No first semester courses found.</p>
+                      )}
                     </div>
                   </div>
 
@@ -305,9 +441,9 @@ export default function Browse() {
                       Final examination papers and end-of-year academic question archives.
                     </p>
                     <div className="space-y-2.5">
-                      {courses
+                      {coursesList
                         .filter((c) => c.semester === 2)
-                        .slice(0, 4)
+                        .slice(0, 5)
                         .map((course) => (
                           <Link
                             key={course.id}
@@ -319,6 +455,9 @@ export default function Browse() {
                             <ArrowRight size={14} className="text-(--color-text-muted) group-hover:text-(--color-primary) group-hover:translate-x-1 transition-transform" />
                           </Link>
                         ))}
+                      {coursesList.filter((c) => c.semester === 2).length === 0 && (
+                        <p className="text-xs text-(--color-text-muted) py-4 text-center">No second semester courses found.</p>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -339,23 +478,35 @@ export default function Browse() {
                     title="Explore by Faculty"
                     subtitle="Select a faculty to view departments and courses"
                   />
-                  <div className="grid sm:grid-cols-2 gap-5">
-                    {faculties.map((faculty) => (
-                      <FacultyCard key={faculty.id} faculty={faculty} />
-                    ))}
-                  </div>
+                  {facultiesList.length === 0 ? (
+                    <div className="py-12 text-center text-(--color-text-muted) text-sm bg-(--color-surface) rounded-xl border border-(--color-border)">
+                      No faculties found in the database.
+                    </div>
+                  ) : (
+                    <div className="grid sm:grid-cols-2 gap-5">
+                      {facultiesList.map((faculty) => (
+                        <FacultyCard key={faculty.id} faculty={faculty} />
+                      ))}
+                    </div>
+                  )}
                 </div>
 
                 <div>
                   <SectionHeader
-                    title="Popular Courses"
-                    subtitle="Quickly jump into frequently searched courses"
+                    title="Available Courses"
+                    subtitle="Quickly jump into courses"
                   />
-                  <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {courses.slice(0, 6).map((course) => (
-                      <CourseCard key={course.id} course={course} />
-                    ))}
-                  </div>
+                  {coursesList.length === 0 ? (
+                    <div className="py-12 text-center text-(--color-text-muted) text-sm bg-(--color-surface) rounded-xl border border-(--color-border)">
+                      No courses found in the database.
+                    </div>
+                  ) : (
+                    <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {coursesList.slice(0, 9).map((course) => (
+                        <CourseCard key={course.id} course={course} />
+                      ))}
+                    </div>
+                  )}
                 </div>
               </motion.div>
             )}

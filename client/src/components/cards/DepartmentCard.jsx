@@ -1,11 +1,15 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { GraduationCap, ArrowRight } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
+
 import { BookCover } from '../illustrations/BookIllustration';
 import { getCourseCountByDept } from '../../data/mockData';
 
 export default function DepartmentCard({ department }) {
-  const courseCount = getCourseCountByDept(department.slug);
+  const courseCount = department.courseCount !== undefined
+    ? department.courseCount
+    : (getCourseCountByDept(department.slug) || 0);
+
 
   return (
     <motion.div whileHover={{ y: -3 }} transition={{ duration: 0.2 }}>

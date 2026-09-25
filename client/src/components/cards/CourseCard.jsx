@@ -1,12 +1,16 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { FileText, ArrowRight, BookOpen } from 'lucide-react';
+import { FileText, ArrowRight } from 'lucide-react';
+
 import Badge from '../ui/Badge';
 import { BookCover } from '../illustrations/BookIllustration';
 import { getPQCountByCourse } from '../../data/mockData';
 
 export default function CourseCard({ course }) {
-  const pqCount = getPQCountByCourse(course.id);
+  const pqCount = course.pastQuestionCount !== undefined
+    ? course.pastQuestionCount
+    : (getPQCountByCourse(course.id) || 0);
+
 
   return (
     <motion.div whileHover={{ y: -3 }} transition={{ duration: 0.2 }}>

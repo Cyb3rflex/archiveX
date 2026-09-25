@@ -5,8 +5,7 @@
 
 const supabaseAdmin = require('../lib/supabase-admin');
 const { signToken } = require('../lib/jwt');
-const prisma = require('../config/database');
-const { successResponse, errorResponse } = require('../utils/api-response');
+const { successResponse } = require('../utils/api-response');
 const AppError = require('../utils/app-error');
 
 /**
@@ -28,27 +27,39 @@ async function login(req, res, next) {
       throw new AppError('Invalid email or password.', 401);
     }
 
-    // Fetch admin record from our database
-    const admin = await prisma.admin.findUnique({
-      where: { email: data.user.email },
-      select: { id: true, fullName: true, email: true, role: true },
-    });
+    // Fetch admin record from Supabase database
+    const { data: admin, error: dbError } = await supabaseAdmin
+      .from('admins')
+      .select('id, full_name, email, role')
+      .eq('email', data.user.email)
+      .maybeSingle();
+
+    if (dbError) {
+      throw new AppError('Database error while finding admin account.', 500);
+    }
 
     if (!admin) {
       throw new AppError('Account not found. Contact a super administrator.', 401);
     }
 
-    // Issue our own JWT
-    const token = signToken({
-      userId: admin.id,
-      supabaseUserId: data.user.id,
+    const user = {
+      id: admin.id,
+      fullName: admin.full_name,
       email: admin.email,
       role: admin.role,
+    };
+
+    // Issue our own JWT
+    const token = signToken({
+      userId: user.id,
+      supabaseUserId: data.user.id,
+      email: user.email,
+      role: user.role,
     });
 
     return successResponse(res, 'Login successful.', {
       token,
-      user: admin,
+      user,
     });
   } catch (err) {
     return next(err);
@@ -61,16 +72,29 @@ async function login(req, res, next) {
  */
 async function me(req, res, next) {
   try {
-    const admin = await prisma.admin.findUnique({
-      where: { id: req.user.id },
-      select: { id: true, fullName: true, email: true, role: true, createdAt: true },
-    });
+    const { data: admin, error } = await supabaseAdmin
+      .from('admins')
+      .select('id, full_name, email, role, created_at')
+      .eq('id', req.user.id)
+      .maybeSingle();
+
+    if (error) {
+      throw new AppError('Database error while retrieving profile.', 500);
+    }
 
     if (!admin) {
       throw new AppError('User not found.', 404);
     }
 
-    return successResponse(res, 'Current user retrieved.', admin);
+    const formatted = {
+      id: admin.id,
+      fullName: admin.full_name,
+      email: admin.email,
+      role: admin.role,
+      createdAt: admin.created_at,
+    };
+
+    return successResponse(res, 'Current user retrieved.', formatted);
   } catch (err) {
     return next(err);
   }
@@ -80,10 +104,8 @@ async function me(req, res, next) {
  * POST /auth/logout
  * No body required — client should discard the token.
  */
-async function logout(req, res, next) {
+async function logout(_req, res, next) {
   try {
-    // In a stateless JWT setup, logout is handled client-side.
-    // If using refresh tokens (future), invalidate them here via Supabase.
     return successResponse(res, 'Logged out successfully.');
   } catch (err) {
     return next(err);

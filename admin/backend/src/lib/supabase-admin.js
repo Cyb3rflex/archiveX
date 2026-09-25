@@ -7,11 +7,14 @@
 const { createClient } = require('@supabase/supabase-js');
 const config = require('../config/env');
 
-const supabaseAdmin = createClient(config.supabaseUrl, config.supabaseServiceRoleKey, {
-  auth: {
-    autoRefreshToken: false,
-    persistSession: false,
-  },
-});
+const supabaseAdmin =
+  config.supabaseUrl && config.supabaseServiceRoleKey
+    ? createClient(config.supabaseUrl, config.supabaseServiceRoleKey, {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false,
+        },
+      })
+    : null;
 
 module.exports = supabaseAdmin;
