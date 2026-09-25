@@ -14,7 +14,7 @@ async function getAll(req, res, next) {
       return successResponse(res, 'No courses available (database not configured).', []);
     }
 
-    const { departmentSlug, levelName, semesterName, q } = req.query;
+    const { departmentSlug, levelName, level, semesterName, semester, q } = req.query;
 
     let query = supabase
       .from('courses')
@@ -27,10 +27,44 @@ async function getAll(req, res, next) {
       `)
       .order('course_code', { ascending: true });
 
-    if (departmentSlug) query = query.eq('department.slug', departmentSlug);
-    if (levelName) query = query.eq('level.name', levelName);
-    if (semesterName) query = query.eq('semester.name', semesterName);
+    if (departmentSlug) {
+      const { data: dept } = await supabase
+        .from('departments')
+        .select('id')
+        .eq('slug', departmentSlug)
+        .maybeSingle();
+      if (!dept) return successResponse(res, 'Courses retrieved.', []);
+      query = query.eq('department_id', dept.id);
+    }
+
+    const lvlFilter = level || levelName;
+    if (lvlFilter) {
+      const cleanLvl = String(lvlFilter).replace(/[^0-9]/g, '');
+      const { data: lvlRecord } = await supabase
+        .from('levels')
+        .select('id')
+        .ilike('name', `%${cleanLvl || lvlFilter}%`)
+        .maybeSingle();
+      if (lvlRecord) {
+        query = query.eq('level_id', lvlRecord.id);
+      }
+    }
+
+    const semFilter = semester || semesterName;
+    if (semFilter) {
+      const semKeyword = String(semFilter) === '1' ? 'First' : String(semFilter) === '2' ? 'Second' : semFilter;
+      const { data: semRecord } = await supabase
+        .from('semesters')
+        .select('id')
+        .ilike('name', `%${semKeyword}%`)
+        .maybeSingle();
+      if (semRecord) {
+        query = query.eq('semester_id', semRecord.id);
+      }
+    }
+
     if (q) query = query.or(`course_code.ilike.%${q}%,course_title.ilike.%${q}%`);
+
 
     const { data: courses, error } = await query;
     if (error) throw new AppError(error.message, 500);

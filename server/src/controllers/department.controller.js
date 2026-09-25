@@ -21,11 +21,20 @@ async function getAll(req, res, next) {
       .order('name', { ascending: true });
 
     if (facultySlug) {
-      // Filter by faculty slug via the join
-      query = query.eq('faculty.slug', facultySlug);
+      const { data: faculty } = await supabase
+        .from('faculties')
+        .select('id')
+        .eq('slug', facultySlug)
+        .maybeSingle();
+
+      if (!faculty) {
+        return successResponse(res, 'Departments retrieved.', []);
+      }
+      query = query.eq('faculty_id', faculty.id);
     }
 
     const { data: departments, error } = await query;
+
     if (error) throw new AppError(error.message, 500);
 
     const data = (departments || []).map((d) => ({

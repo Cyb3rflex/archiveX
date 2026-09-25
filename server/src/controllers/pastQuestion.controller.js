@@ -28,8 +28,18 @@ async function getAll(req, res, next) {
     if (courseId) {
       query = query.eq('course_id', courseId);
     } else if (courseSlug) {
-      query = query.eq('course.slug', courseSlug);
+      const { data: course } = await supabase
+        .from('courses')
+        .select('id')
+        .eq('slug', courseSlug)
+        .maybeSingle();
+
+      if (!course) {
+        return successResponse(res, 'Past questions retrieved.', []);
+      }
+      query = query.eq('course_id', course.id);
     }
+
 
     const { data: questions, error } = await query;
     if (error) throw new AppError(error.message, 500);
