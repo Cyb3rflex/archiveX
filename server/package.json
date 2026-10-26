@@ -1,12 +1,12 @@
 {
   "name": "archivex-server",
   "version": "1.0.0",
-  "description": "ArchiveX API server — university past question archive platform",
+  "description": "ArchiveX API server \u2014 university past question archive platform",
   "private": true,
   "main": "src/server.js",
   "scripts": {
-    "dev": "nodemon src/server.js",
-    "start": "node src/server.js"
+    "dev": "node init && nodemon src/server.js",
+    "start": "node init && node src/server.js"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.48.0",

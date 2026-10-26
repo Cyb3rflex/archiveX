@@ -1,12 +1,12 @@
 {
   "name": "archivex-admin-backend",
   "version": "1.0.0",
-  "description": "ArchiveX Admin API — backend for the admin dashboard",
+  "description": "ArchiveX Admin API \u2014 backend for the admin dashboard",
   "private": true,
   "main": "src/server.js",
   "scripts": {
-    "dev": "nodemon src/server.js",
-    "start": "node src/server.js",
+    "dev": "node init && nodemon src/server.js",
+    "start": "node init && node src/server.js",
     "seed": "node scripts/seed.js"
   },
   "dependencies": {
